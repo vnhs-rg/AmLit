@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puritan Literature Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #6A9BCC;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .card-container {
+            position: relative;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+        
+        .flashcard {
+            width: 100%;
+            height: 24rem;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.7s;
+            cursor: pointer;
+        }
+        
+        .flashcard.flipped {
+            transform: rotateX(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            backface-visibility: hidden;
+        }
+        
+        .card-back {
+            transform: rotateX(180deg);
+        }
+        
+        .card-front h2 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: #374151;
+            text-align: center;
+        }
+        
+        .card-back p {
+            font-size: 1.25rem;
+            color: #374151;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        .flip-instruction {
+            color: #6B7280;
+            margin-top: auto;
+            font-size: 0.875rem;
+        }
+        
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 1.5rem;
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .nav-button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
+        
+        .counter {
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin: 0 1rem;
+        }
+        
+        .shuffle-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-left: 1rem;
+        }
+        
+        .shuffle-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .title {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .animating {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.15s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Puritan Literature Flashcards</h1>
+        
+        <div class="card-container">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front">
+                    <h2 id="card-front-text">DIVINE PROVIDENCE</h2>
+                    <p class="flip-instruction">Use ↑↓ arrows or click to flip</p>
+                </div>
+                <div class="card-face card-back">
+                    <p id="card-back-text">After the London fire destroyed thousands of homes, Puritan colonists in America saw it as Divine Providence - God's plan unfolding according to His perfect will.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="nav-button" id="prev-button" onclick="previousCard()">‹</button>
+            
+            <div style="display: flex; align-items: center;">
+                <span class="counter" id="counter">1 / 8</span>
+                <button class="shuffle-button" onclick="shuffleCards()" title="Shuffle">🔀</button>
+            </div>
+            
+            <button class="nav-button" id="next-button" onclick="nextCard()">›</button>
+        </div>
+    </div>
+
+    <script>
+        const flashcards = [
+            {
+                "front": "DIVINE PROVIDENCE",
+                "back": "After the London fire destroyed thousands of homes, Puritan colonists in America saw it as Divine Providence - God's plan unfolding according to His perfect will."
+            },
+            {
+                "front": "PLAIN STYLE", 
+                "back": "Colonial writers used plain style rather than fancy European language because most settlers needed clear, simple communication to survive."
+            },
+            {
+                "front": "BIBLICAL ALLUSION",
+                "back": "When writing about disasters, Puritans made biblical allusions to stories like Job losing everything but still praising God."
+            },
+            {
+                "front": "STEWARDSHIP",
+                "back": "Puritans believed in stewardship, that humans are temporary caretakers of God's property, so losing a house meant returning God's possessions to Him."
+            },
+            {
+                "front": "REPINE",
+                "back": "Colonial fire victims were taught not to repine (complain) about their losses because that would question God's perfect judgment."
+            },
+            {
+                "front": "TEMPORAL",
+                "back": "Puritans distinguished between temporal concerns like houses and money, and eternal concerns like salvation and heaven."
+            },
+            {
+                "front": "VANITY", 
+                "back": "Following Ecclesiastes, Puritans believed material possessions were vanity, ultimately empty and worthless compared to spiritual treasures."
+            },
+            {
+                "front": "SELF-EXAMINATION",
+                "back": "After disasters, Puritans practiced self-examination, searching their hearts for sins that might have caused God's judgment."
+            }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+        let isAnimating = false;
+
+        function updateCard() {
+            const card = flashcards[currentIndex];
+            document.getElementById('card-front-text').textContent = card.front;
+            document.getElementById('card-back-text').textContent = card.back;
+            document.getElementById('counter').textContent = `${currentIndex + 1} / ${flashcards.length}`;
+            
+            // Update navigation buttons
+            document.getElementById('prev-button').disabled = currentIndex === 0;
+            document.getElementById('next-button').disabled = currentIndex === flashcards.length - 1;
+        }
+
+        function flipCard() {
+            if (isAnimating) return;
+            isFlipped = !isFlipped;
+            document.getElementById('flashcard').classList.toggle('flipped', isFlipped);
+        }
+
+        function nextCard() {
+            if (currentIndex < flashcards.length - 1 && !isAnimating) {
+                animateTransition(() => {
+                    currentIndex++;
+                    isFlipped = false;
+                    document.getElementById('flashcard').classList.remove('flipped');
+                    updateCard();
+                });
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0 && !isAnimating) {
+                animateTransition(() => {
+                    currentIndex--;
+                    isFlipped = false;
+                    document.getElementById('flashcard').classList.remove('flipped');
+                    updateCard();
+                });
+            }
+        }
+
+        function shuffleCards() {
+            if (isAnimating) return;
+            
+            animateTransition(() => {
+                // Fisher-Yates shuffle
+                for (let i = flashcards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+                }
+                
+                currentIndex = 0;
+                isFlipped = false;
+                document.getElementById('flashcard').classList.remove('flipped');
+                updateCard();
+            });
+        }
+
+        function animateTransition(callback) {
+            isAnimating = true;
+            document.getElementById('flashcard').classList.add('animating');
+            
+            setTimeout(() => {
+                callback();
+                setTimeout(() => {
+                    document.getElementById('flashcard').classList.remove('animating');
+                    isAnimating = false;
+                }, 50);
+            }, 150);
+        }
+
+        // Event listeners
+        document.getElementById('flashcard').addEventListener('click', flipCard);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+
+        // Initialize
+        updateCard();
+    </script>
+</body>
+</html>
