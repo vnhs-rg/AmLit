@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuller's Historical Context Timeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+Great+Primer:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'IM Fell Great Primer', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .timeline-area {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .slot {
+            border: 2px dashed #999;
+            padding: 15px;
+            min-height: 80px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .slot.filled {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .slot.wrong {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .timeline {
+            height: 30px;
+            background: #8d6e63;
+            position: relative;
+            border-radius: 15px;
+        }
+
+        .events-area {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .events {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .event {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .event:hover {
+            background: #e0e0e0;
+        }
+
+        .event.used {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background: #1976d2;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .feedback.error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Fuller's Historical Context Timeline</h1>
+            <p>Place events in chronological order (1800-1860)</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <strong>Score:</strong> <span id="score">0</span>
+            </div>
+            <div class="score-item">
+                <strong>Round:</strong> <span id="round">1</span>/3
+            </div>
+            <div class="score-item">
+                <strong>Correct:</strong> <span id="correct">--</span>/6
+            </div>
+        </div>
+
+        <div class="timeline-area">
+            <h3>Timeline Slots (Earliest to Latest)</h3>
+            <div class="slots" id="slots"></div>
+            <div class="timeline"></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="checkOrder()">Check Order</button>
+            <button onclick="getHint()">Get Hint (-5 points)</button>
+            <button onclick="resetRound()">Reset Round</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="events-area">
+            <h3>Historical Events - Click to Select, Then Click a Slot</h3>
+            <div class="events" id="events"></div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = {
+            round1: [
+                { year: 1810, text: "Margaret Fuller born in Cambridge, Massachusetts" },
+                { year: 1824, text: "Fuller begins rigorous education with her father" },
+                { year: 1836, text: "Emerson publishes 'Nature', founding Transcendentalism" },
+                { year: 1839, text: "Fuller begins her 'Conversations' for women" },
+                { year: 1843, text: "Fuller writes 'The Great Lawsuit'" },
+                { year: 1845, text: "Fuller publishes 'Woman in the Nineteenth Century'" }
+            ],
+            round2: [
+                { year: 1833, text: "Oberlin College admits women" },
+                { year: 1840, text: "World Anti-Slavery Convention excludes women delegates" },
+                { year: 1841, text: "Brook Farm utopian community founded" },
+                { year: 1844, text: "Fuller becomes first female foreign correspondent" },
+                { year: 1848, text: "Seneca Falls Convention for women's rights" },
+                { year: 1850, text: "Fuller dies in shipwreck returning from Italy" }
+            ],
+            round3: [
+                { year: 1820, text: "Missouri Compromise on slavery" },
+                { year: 1837, text: "Financial Panic and economic depression" },
+                { year: 1838, text: "Angelina Grimké speaks to Massachusetts Legislature" },
+                { year: 1842, text: "Dorothea Dix campaigns for mental health reform" },
+                { year: 1846, text: "Fuller travels to Europe as journalist" },
+                { year: 1849, text: "Thoreau publishes 'Civil Disobedience'" }
+            ]
+        };
+
+        let currentRound = 1;
+        let score = 0;
+        let selectedEvent = null;
+        let placedEvents = [];
+        let hintsUsed = 0;
+
+        function init() {
+            createSlots();
+            loadEvents();
+            updateDisplay();
+        }
+
+        function createSlots() {
+            const slotsDiv = document.getElementById('slots');
+            slotsDiv.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.innerHTML = 'Slot ' + (i + 1);
+                slot.onclick = function() { placeEvent(i); };
+                slotsDiv.appendChild(slot);
+            }
+            placedEvents = new Array(6).fill(null);
+        }
+
+        function loadEvents() {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = '';
+            const events = gameData['round' + currentRound];
+            const shuffled = [...events].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((event, index) => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event';
+                eventDiv.innerHTML = event.text;
+                eventDiv.onclick = function() { selectEvent(event, eventDiv); };
+                eventsDiv.appendChild(eventDiv);
+            });
+        }
+
+        function selectEvent(event, div) {
+            if (div.classList.contains('used')) return;
+            
+            document.querySelectorAll('.event').forEach(e => {
+                e.style.border = 'none';
+            });
+            
+            div.style.border = '2px solid #2196f3';
+            selectedEvent = { event: event, div: div };
+        }
+
+        function placeEvent(slotIndex) {
+            if (!selectedEvent) {
+                showFeedback('Please select an event first!', 'error');
+                return;
+            }
+            
+            const slot = document.querySelectorAll('.slot')[slotIndex];
+            
+            if (placedEvents[slotIndex]) {
+                const oldDiv = placedEvents[slotIndex].div;
+                oldDiv.classList.remove('used');
+            }
+            
+            placedEvents[slotIndex] = selectedEvent;
+            slot.innerHTML = selectedEvent.event.text;
+            slot.classList.add('filled');
+            
+            selectedEvent.div.classList.add('used');
+            selectedEvent.div.style.border = 'none';
+            selectedEvent = null;
+            
+            document.getElementById('correct').textContent = '--';
+        }
+
+        function checkOrder() {
+            const filled = placedEvents.filter(p => p !== null).length;
+            if (filled < 6) {
+                showFeedback('Please place all events first!', 'error');
+                return;
+            }
+            
+            const placed = placedEvents.map(p => p.event.year);
+            const sorted = [...placed].sort((a, b) => a - b);
+            
+            let correct = 0;
+            const slots = document.querySelectorAll('.slot');
+            
+            placed.forEach((year, index) => {
+                if (year === sorted[index]) {
+                    correct++;
+                    slots[index].classList.remove('wrong');
+                    slots[index].classList.add('filled');
+                } else {
+                    slots[index].classList.add('wrong');
+                }
+            });
+            
+            score += correct * 10;
+            document.getElementById('correct').textContent = correct;
+            updateDisplay();
+            
+            if (correct === 6) {
+                if (hintsUsed === 0) score += 25;
+                showFeedback('Perfect! All events in correct order!', 'success');
+                setTimeout(nextRound, 3000);
+            } else {
+                showFeedback(correct + ' out of 6 correct. Showing correct order...', 'error');
+                // Show correct placements after a short delay
+                setTimeout(showCorrectOrder, 2000);
+            }
+        }
+
+        function showCorrectOrder() {
+            const events = gameData['round' + currentRound];
+            const sorted = [...events].sort((a, b) => a.year - b.year);
+            const slots = document.querySelectorAll('.slot');
+            
+            slots.forEach((slot, index) => {
+                slot.classList.remove('wrong');
+                slot.classList.add('filled');
+                slot.innerHTML = sorted[index].text + '<br><strong>(' + sorted[index].year + ')</strong>';
+            });
+            
+            showFeedback('Here is the correct chronological order. Click Next Round to continue.', 'success');
+            
+            // Add a next round button
+            const controls = document.querySelector('.controls');
+            if (!document.getElementById('next-btn')) {
+                const nextBtn = document.createElement('button');
+                nextBtn.id = 'next-btn';
+                nextBtn.textContent = 'Next Round';
+                nextBtn.onclick = nextRound;
+                controls.appendChild(nextBtn);
+            }
+        }
+
+        function getHint() {
+            score = Math.max(0, score - 5);
+            hintsUsed++;
+            updateDisplay();
+            
+            const events = gameData['round' + currentRound];
+            const sorted = [...events].sort((a, b) => a.year - b.year);
+            showFeedback('Hint: The earliest event is from ' + sorted[0].year, 'success');
+        }
+
+        function resetRound() {
+            createSlots();
+            loadEvents();
+            selectedEvent = null;
+            document.getElementById('correct').textContent = '--';
+        }
+
+        function nextRound() {
+            // Remove next button if it exists
+            const nextBtn = document.getElementById('next-btn');
+            if (nextBtn) nextBtn.remove();
+            
+            currentRound++;
+            if (currentRound > 3) {
+                showGameComplete();
+            } else {
+                hintsUsed = 0;
+                init();
+            }
+        }
+
+        function showGameComplete() {
+            const container = document.querySelector('.container');
+            
+            // Calculate performance
+            const maxScore = (60 * 3) + (25 * 3); // 60 points per round + 25 bonus per perfect round = 255 total
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            let title = '';
+            let message = '';
+            
+            if (percentage >= 90) {
+                title = '🎓 Timeline Master Achievement! 🎓';
+                message = 'Outstanding! You truly understand Fuller\'s historical context!';
+            } else if (percentage >= 70) {
+                title = '📚 Timeline Scholar! 📚';
+                message = 'Great work! You have a solid grasp of the historical timeline.';
+            } else if (percentage >= 50) {
+                title = '📖 Timeline Student 📖';
+                message = 'Good effort! You\'re learning how these events connect.';
+            } else {
+                title = '🌱 Timeline Beginner 🌱';
+                message = 'Keep practicing! Understanding chronology takes time.';
+            }
+            
+            container.innerHTML = `
+                <div class="header" style="margin-top: 50px;">
+                    <h1>` + title + `</h1>
+                    <h2 style="color: #2e7d32;">Game Complete!</h2>
+                    <p style="font-size: 1.2em; margin: 20px 0;">
+                        ` + message + `
+                    </p>
+                    <div style="font-size: 1.5em; margin: 30px 0;">
+                        <strong>Final Score: ` + score + ` / ` + maxScore + `</strong><br>
+                        <span style="font-size: 0.7em;">Achievement: ` + percentage + `%</span>
+                    </div>
+                    <p style="margin: 20px 0;">
+                        You've explored how historical events from 1800-1860 shaped<br>
+                        Margaret Fuller's revolutionary ideas about women's rights.
+                    </p>
+                    <button onclick="resetGame()" style="font-size: 1.2em; padding: 15px 30px; margin-top: 20px;">
+                        Play Again
+                    </button>
+                </div>
+            `;
+        }
+
+        function resetGame() {
+            currentRound = 1;
+            score = 0;
+            selectedEvent = null;
+            placedEvents = [];
+            hintsUsed = 0;
+            
+            // Rebuild the game interface
+            location.reload();
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = 'feedback show ' + type;
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('round').textContent = currentRound;
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
