@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuller's Rhetorical Strategy Detective</title>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+Great+Primer:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IM Fell Great Primer', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .header p {
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .passage {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            line-height: 1.8;
+            font-size: 1.2rem;
+        }
+
+        .passage-text {
+            margin-bottom: 15px;
+        }
+
+        .hint-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .hint-btn {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'IM Fell Great Primer', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(155, 89, 182, 0.3);
+        }
+
+        .hint-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        .hint-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hint-text {
+            background: #f3e5f5;
+            border: 2px solid #9b59b6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+            font-style: italic;
+            color: #6c3483;
+        }
+
+        .hint-text.show {
+            display: block;
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .strategy-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .strategy-btn {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: 'IM Fell Great Primer', sans-serif;
+            font-weight: normal;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
+            text-align: center;
+        }
+
+        .strategy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 18px rgba(52, 152, 219, 0.4);
+        }
+
+        .strategy-btn:active {
+            transform: translateY(0);
+        }
+
+        .strategy-btn.correct {
+            background: linear-gradient(145deg, #27ae60, #229954);
+            animation: success 0.6s ease-in-out;
+        }
+
+        .strategy-btn.incorrect {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes success {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        .feedback h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .next-btn {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: 'IM Fell Great Primer', sans-serif;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .badge.earned {
+            opacity: 1;
+            animation: glow 2s ease-in-out;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(155, 89, 182, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(155, 89, 182, 0.8); }
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            height: 20px;
+            transition: width 0.5s ease-in-out;
+            border-radius: 20px;
+        }
+
+        .evidence-collection {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .evidence-collection.show {
+            display: block;
+        }
+
+        .evidence-item {
+            background: white;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .strategy-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕵️ Fuller's Rhetorical Strategy Detective</h1>
+            <p>Discover Margaret Fuller's persuasive techniques in "Woman in the Nineteenth Century"</p>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-number" id="score">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="level">1</div>
+                <div class="stat-label">Level</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="found">0/5</div>
+                <div class="stat-label">Strategies Found</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress" style="width: 0%"></div>
+        </div>
+
+        <div class="game-area">
+            <div class="passage">
+                <div class="passage-text" id="passage-text">
+                    Loading passage...
+                </div>
+            </div>
+
+            <div class="hint-section">
+                <button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Need a Hint? (-5 points)</button>
+                <div class="hint-text" id="hint-text"></div>
+            </div>
+
+            <div class="strategy-options" id="strategy-options">
+                <!-- Strategy buttons will be inserted here -->
+            </div>
+
+            <div class="feedback" id="feedback">
+                <h3 id="feedback-title">Excellent Detection!</h3>
+                <p id="feedback-text">You correctly identified the rhetorical strategy.</p>
+                <button class="next-btn" onclick="nextChallenge()">Next Challenge →</button>
+            </div>
+
+            <div class="evidence-collection" id="evidence-collection">
+                <h3>🎯 Evidence Collected for Essay</h3>
+                <p>Great work! You've found evidence you can use in your essay:</p>
+                <div id="evidence-list"></div>
+                <button class="next-btn" onclick="exportEvidence()">Export Evidence List</button>
+            </div>
+        </div>
+
+        <div class="badges">
+            <div class="badge" id="badge-metaphor">🌿 Nature Expert</div>
+            <div class="badge" id="badge-allusion">📖 Allusion Hunter</div>
+            <div class="badge" id="badge-logic">⚖️ Logic Master</div>
+            <div class="badge" id="badge-emotion">❤️ Emotion Detector</div>
+            <div class="badge" id="badge-contrast">🔄 Contrast Finder</div>
+            <div class="badge" id="badge-perfect">⭐ Perfect Score</div>
+        </div>
+    </div>
+
+    <script>
+        // Game data with expanded passages
+        const passages = [
+            {
+                text: "What Woman needs is not as a woman to act or rule, but as a nature to grow, as an intellect to discern, as a soul to live freely and unimpeded, to unfold such powers as were given her when we left our common home.",
+                strategy: "nature-metaphor",
+                explanation: "Fuller uses nature imagery ('to grow,' 'to unfold') to describe women's development, connecting human potential to natural processes—a key Transcendentalist technique.",
+                evidence: "Nature metaphor connecting women's growth to natural processes",
+                hint: "Look for words that compare human development to natural growth..."
+            },
+            {
+                text: "The electrical, the magnetic element in Woman has not been fairly brought out at any period. Everything might be expected from it; she has far more of it than Man.",
+                strategy: "nature-metaphor", 
+                explanation: "Fuller uses natural forces (electrical, magnetic) as metaphors for women's intuitive power, connecting feminine energy to natural phenomena.",
+                evidence: "Electrical/magnetic metaphors for women's intuitive abilities",
+                hint: "Notice how Fuller compares women's power to forces in nature..."
+            },
+            {
+                text: "I solicit of women that they will lay it to heart to ascertain what is for them the liberty of law. It is for this, and not for any, the largest, extension of partial privileges that I seek.",
+                strategy: "logical-argument",
+                explanation: "Fuller builds a logical case by distinguishing between 'liberty of law' (true equality) versus 'extension of partial privileges' (limited rights).",
+                evidence: "Logical distinction between true equality and limited privileges",
+                hint: "Focus on how Fuller makes a distinction between two different concepts..."
+            },
+            {
+                text: "Meanwhile, not a few believe, and men themselves have expressed the opinion, that the time is come when Eurydice is to call for an Orpheus, rather than Orpheus for Eurydice.",
+                strategy: "biblical-allusion",
+                explanation: "Fuller references the Greek myth of Orpheus and Eurydice to suggest that women should now take the lead in relationships and society, reversing traditional gender roles.",
+                evidence: "Mythological allusion to reverse traditional gender roles",
+                hint: "This references a famous Greek myth about a musician and his wife..."
+            },
+            {
+                text: "Frailty, thy name is WOMAN. The Earth waits for her Queen. Yet would any contradict us, if we made them applicable to the other side, and began also, Frailty, thy name is MAN?",
+                strategy: "contrast-reversal",
+                explanation: "Fuller quotes Shakespeare's Hamlet ('Frailty, thy name is woman') then cleverly reverses it to challenge stereotypes about female weakness.",
+                evidence: "Shakespeare reference reversed to challenge gender stereotypes",
+                hint: "Notice how Fuller takes a famous quote and flips it around..."
+            },
+            {
+                text: "Those who seem overladen with electricity frighten those around them. 'When she merely enters the room, I am what the French call herissé,' said a man of petty feelings and worldly character.",
+                strategy: "emotional-appeal",
+                explanation: "Fuller uses a vivid personal anecdote to make readers feel the unfair fear and rejection that powerful women face in society.",
+                evidence: "Personal anecdote showing societal fear of powerful women",
+                hint: "Look for how Fuller uses a personal story to evoke feelings..."
+            },
+            {
+                text: "By Man I mean both man and woman; these are the two halves of one thought. I lay no especial stress on the welfare of either. I believe that the development of the one cannot be effected without that of the other.",
+                strategy: "logical-argument",
+                explanation: "Fuller establishes a logical foundation that men and women are interdependent, making her argument for women's rights also an argument for human progress.",
+                evidence: "Logical argument for interdependence of genders",
+                hint: "Consider how Fuller makes a logical connection between the progress of both genders..."
+            },
+            {
+                text: "She excels not so easily in classification, or recreation, as in an instinctive seizure of causes, and a simple breathing out of what she receives, that has the singleness of life, rather than the selecting and energizing of art.",
+                strategy: "contrast-reversal",
+                explanation: "Fuller contrasts women's intuitive, holistic way of knowing with men's analytical approach, elevating intuition as equally valuable.",
+                evidence: "Contrast between intuitive and analytical thinking styles",
+                hint: "Look at how Fuller compares two different ways of understanding the world..."
+            },
+            {
+                text: "Women who combine this organization with creative genius are very commonly unhappy at present. They see too much to act in conformity with those around them, and their quick impulses seem folly to those who do not discern the motives.",
+                strategy: "emotional-appeal",
+                explanation: "Fuller appeals to readers' empathy by describing the painful isolation of gifted women who don't fit societal expectations.",
+                evidence: "Emotional appeal about the suffering of creative women",
+                hint: "Notice how Fuller describes the emotional pain of being misunderstood..."
+            },
+            {
+                text: "Then, 'she who advances With rapturous, lyrical glances, Singing the song of the earth, singing Its hymn to the Gods,' will not be pitied as a mad-woman, nor shrunk from as unnatural.",
+                strategy: "biblical-allusion",
+                explanation: "Fuller uses poetic, almost religious imagery to envision a future where women's spiritual connection to nature is honored rather than feared.",
+                evidence: "Poetic/religious imagery of women's spiritual nature",
+                hint: "This passage uses elevated, spiritual language to make a point..."
+            }
+        ];
+
+        const strategyTypes = {
+            'nature-metaphor': 'Nature Metaphor',
+            'biblical-allusion': 'Literary/Biblical Allusion', 
+            'logical-argument': 'Logical Argument',
+            'emotional-appeal': 'Emotional Appeal',
+            'contrast-reversal': 'Contrast & Reversal'
+        };
+
+        // Game state
+        let currentPassage = 0;
+        let score = 0;
+        let attempts = 0;
+        let correctAnswers = 0;
+        let evidenceCollected = [];
+        let hintUsed = false;
+        let strategiesFound = new Set();
+        let badgesEarned = {
+            metaphor: 0,
+            allusion: 0,
+            logic: 0,
+            emotion: 0,
+            contrast: 0
+        };
+
+        function initGame() {
+            loadPassage();
+            updateStats();
+        }
+
+        function loadPassage() {
+            if (currentPassage >= passages.length) {
+                showGameComplete();
+                return;
+            }
+
+            const passage = passages[currentPassage];
+            document.getElementById('passage-text').textContent = passage.text;
+            
+            // Create strategy options
+            const options = createStrategyOptions(passage.strategy);
+            const optionsContainer = document.getElementById('strategy-options');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'strategy-btn';
+                button.textContent = strategyTypes[option];
+                button.onclick = () => selectStrategy(option, passage.strategy);
+                optionsContainer.appendChild(button);
+            });
+
+            // Reset hint
+            hintUsed = false;
+            document.getElementById('hint-btn').disabled = false;
+            document.getElementById('hint-text').classList.remove('show');
+            document.getElementById('hint-text').textContent = '';
+
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('evidence-collection').classList.remove('show');
+        }
+
+        function createStrategyOptions(correctStrategy) {
+            const allStrategies = Object.keys(strategyTypes);
+            const options = [correctStrategy];
+            
+            // Add 3 random incorrect options
+            while (options.length < 4) {
+                const randomStrategy = allStrategies[Math.floor(Math.random() * allStrategies.length)];
+                if (!options.includes(randomStrategy)) {
+                    options.push(randomStrategy);
+                }
+            }
+            
+            // Shuffle the options
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function showHint() {
+            if (!hintUsed) {
+                score = Math.max(0, score - 5);
+                hintUsed = true;
+                const passage = passages[currentPassage];
+                document.getElementById('hint-text').textContent = passage.hint;
+                document.getElementById('hint-text').classList.add('show');
+                document.getElementById('hint-btn').disabled = true;
+                updateStats();
+            }
+        }
+
+        function selectStrategy(selected, correct) {
+            attempts++;
+            const buttons = document.querySelectorAll('.strategy-btn');
+            
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === strategyTypes[selected]) {
+                    if (selected === correct) {
+                        btn.classList.add('correct');
+                        score += 10;
+                        correctAnswers++;
+                        strategiesFound.add(correct);
+                        showCorrectFeedback();
+                        addEvidence();
+                        updateBadges(correct);
+                    } else {
+                        btn.classList.add('incorrect');
+                        showIncorrectFeedback(correct);
+                    }
+                }
+            });
+            
+            updateStats();
+        }
+
+        function showCorrectFeedback() {
+            const passage = passages[currentPassage];
+            document.getElementById('feedback-title').textContent = '🎯 Excellent Detection!';
+            document.getElementById('feedback-text').textContent = passage.explanation;
+            document.getElementById('feedback').classList.add('show');
+        }
+
+        function showIncorrectFeedback(correctStrategy) {
+            const passage = passages[currentPassage];
+            document.getElementById('feedback-title').textContent = '🤔 Not Quite Right';
+            document.getElementById('feedback-text').innerHTML = `
+                The correct strategy was <strong>${strategyTypes[correctStrategy]}</strong>. 
+                ${passage.explanation}
+            `;
+            document.getElementById('feedback').classList.add('show');
+        }
+
+        function addEvidence() {
+            const passage = passages[currentPassage];
+            evidenceCollected.push({
+                text: passage.text,
+                strategy: strategyTypes[passage.strategy],
+                evidence: passage.evidence
+            });
+            
+            if (evidenceCollected.length === 5) {
+                showEvidenceCollection();
+            }
+        }
+
+        function showEvidenceCollection() {
+            const evidenceList = document.getElementById('evidence-list');
+            evidenceList.innerHTML = '';
+            
+            evidenceCollected.forEach((item, index) => {
+                const evidenceDiv = document.createElement('div');
+                evidenceDiv.className = 'evidence-item';
+                evidenceDiv.innerHTML = `
+                    <strong>${item.strategy}:</strong> ${item.evidence}<br>
+                    <em>"${item.text.substring(0, 60)}..."</em>
+                `;
+                evidenceList.appendChild(evidenceDiv);
+            });
+            
+            document.getElementById('evidence-collection').classList.add('show');
+        }
+
+        function updateBadges(correctStrategy) {
+            if (correctStrategy === 'nature-metaphor') {
+                badgesEarned.metaphor++;
+                if (badgesEarned.metaphor >= 2) {
+                    document.getElementById('badge-metaphor').classList.add('earned');
+                }
+            } else if (correctStrategy === 'biblical-allusion') {
+                badgesEarned.allusion++;
+                if (badgesEarned.allusion >= 2) {
+                    document.getElementById('badge-allusion').classList.add('earned');
+                }
+            } else if (correctStrategy === 'logical-argument') {
+                badgesEarned.logic++;
+                if (badgesEarned.logic >= 2) {
+                    document.getElementById('badge-logic').classList.add('earned');
+                }
+            } else if (correctStrategy === 'emotional-appeal') {
+                badgesEarned.emotion++;
+                if (badgesEarned.emotion >= 2) {
+                    document.getElementById('badge-emotion').classList.add('earned');
+                }
+            } else if (correctStrategy === 'contrast-reversal') {
+                badgesEarned.contrast++;
+                if (badgesEarned.contrast >= 2) {
+                    document.getElementById('badge-contrast').classList.add('earned');
+                }
+            }
+            
+            // Perfect score badge
+            if (attempts === correctAnswers && attempts >= 5) {
+                document.getElementById('badge-perfect').classList.add('earned');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = Math.floor(currentPassage / 3) + 1;
+            document.getElementById('found').textContent = `${strategiesFound.size}/5`;
+            
+            const accuracy = attempts > 0 ? Math.round((correctAnswers / attempts) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            const progress = (currentPassage / passages.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function nextChallenge() {
+            currentPassage++;
+            const buttons = document.querySelectorAll('.strategy-btn');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('correct', 'incorrect');
+            });
+            loadPassage();
+        }
+
+        function exportEvidence() {
+            let exportText = "FULLER'S RHETORICAL STRATEGIES - EVIDENCE FOR ESSAY\n\n";
+            evidenceCollected.forEach((item, index) => {
+                exportText += `${index + 1}. ${item.strategy}\n`;
+                exportText += `Evidence: ${item.evidence}\n`;
+                exportText += `Quote: "${item.text}"\n\n`;
+            });
+            
+            exportText += `\nFinal Score: ${score}\n`;
+            exportText += `Accuracy: ${attempts > 0 ? Math.round((correctAnswers / attempts) * 100) : 100}%\n`;
+            exportText += `Strategies Mastered: ${strategiesFound.size}/5\n`;
+            
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fuller-evidence-collection.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showGameComplete() {
+            document.getElementById('passage-text').innerHTML = `
+                <h2>🎉 Detective Work Complete!</h2>
+                <p>You've analyzed all of Fuller's rhetorical strategies. Your final score: <strong>${score}</strong></p>
+                <p>Strategies correctly identified: <strong>${correctAnswers} out of ${attempts}</strong></p>
+                <p>Different strategies found: <strong>${strategiesFound.size} out of 5</strong></p>
+                <p>You're now ready to use these techniques in your essay analysis!</p>
+            `;
+            
+            document.getElementById('strategy-options').innerHTML = `
+                <button class="strategy-btn" onclick="location.reload()">Play Again</button>
+                <button class="strategy-btn" onclick="exportEvidence()">Export All Evidence</button>
+            `;
+            
+            document.getElementById('hint-section').style.display = 'none';
+        }
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
